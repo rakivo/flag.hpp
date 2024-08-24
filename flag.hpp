@@ -1,10 +1,5 @@
 #pragma once
 
-#include <string>
-#include <cstdlib>
-#include <iomanip>
-#include <cstring>
-#include <utility>
 #include <optional>
 #include <type_traits>
 
@@ -50,18 +45,7 @@ struct Flag {
 
 template <class T>
 std::ostream&
-operator<<(std::ostream& os, const Flag<T>& flag)
-{
-    const int HELP_WIDTH = 24;
-
-    os << std::right;
-    os << std::right
-       << "[" << flag.shrt << ", " << flag.lng << "]"
-       << std::setw(HELP_WIDTH - (std::strlen(flag.shrt) + std::strlen(flag.lng) + 4))
-       << " " << flag.help;
-
-    return os;
-}
+operator<<(std::ostream& os, const Flag<T>& flag);
 
 // Template for string types: `std::string` or `const char *`
 template <class T, class = void>
@@ -96,138 +80,201 @@ struct Parser {
     {};
 
     [[noreturn]] static void
-    mandatory_flag_hasnt_been_passed(const char *shrt, const char *lng)
-    {
-        std::cerr << "Mandatory flag `" << shrt
-                  << "` or `"           << lng
-                  << "` hasn't been passed" << std::endl;
-
-        std::exit(1);
-    }
+    mandatory_flag_hasnt_been_passed(const char *shrt, const char *lng);
 
     [[noreturn]] static void
-    flag_hasnt_been_passed(const char *shrt, const char *lng)
-    {
-        std::cerr << "Flag `" << shrt
-                  << "` or `" << lng
-                  << "` hasn't been passed" << std::endl;
-
-        std::exit(1);
-    }
+    flag_hasnt_been_passed(const char *shrt, const char *lng);
 
     [[noreturn]] static void
-    failed_to_parse_flag_to_int(const char *shrt, const char *lng, const char *v)
-    {
-        std::cerr << "Failed to parse `" << v << "` to integer"
-                  << ", value of the `"  << shrt
-                  << "` or `"            << lng << "` flag." << std::endl;
-
-        std::exit(1);
-    }
+    failed_to_parse_flag_to_int(const char *shrt, const char *lng, const char *v);
 
     std::optional<const char *>
-    parse_str(const char *shrt, const char *lng) const noexcept
-    {
-        for (size_t i = 0; i < this->argc; i++) {
-            if (0 == std::strcmp(this->argv[i], shrt) or
-                0 == std::strcmp(this->argv[i], lng))
-            {
-                if (i + 1 >= this->argc) return std::nullopt;
-                return this->argv[i + 1];
-            }
-        }
-
-        return std::nullopt;
-    }
+    parse_str(const char *shrt, const char *lng) const noexcept;
 
     inline const char *
-    parse_str_or_exit(const char *shrt, const char *lng) const noexcept
-    {
-        const auto ret = this->parse_str(shrt, lng);
-        if (ret == std::nullopt) flag_hasnt_been_passed(shrt, lng);
-        return *ret;
-    }
+    parse_str_or_exit(const char *shrt, const char *lng) const noexcept;
 
     template <class T>
     inline std::optional<class std::enable_if<is_string_or_cstr<T>::value>::type>
-    parse(const Flag<T>& flag) const noexcept
-    {
-        return this->parse_str(flag.shrt, flag.lng);
-    }
+    parse(const Flag<T>& flag) const noexcept;
 
     template <class T>
     inline class std::enable_if<is_string_or_cstr<T>::value>::type
-    parse(const Flag<T>& flag, T def) const noexcept
-    {
-        const auto ret_ = this->parse_str(flag.shrt, flag.lng);
-        if (ret_ == std::nullopt) {
-            if (flag.mandatory) mandatory_flag_hasnt_been_passed(flag.shrt, flag.lng);
-            return def;
-        }
-        return *ret_;
-    }
+    parse(const Flag<T>& flag, T def) const noexcept;
 
     template <class T>
     inline std::optional<class std::enable_if<std::is_floating_point<T>::value, T>::type>
-    parse(const Flag<T>& flag) const noexcept
-    {
-        const auto ret = this->parse_str(flag.shrt, flag.lng);
-        if (ret == std::nullopt) return std::nullopt;
-
-        try {
-            return std::stof(*ret);
-        } catch (...) {
-            return std::nullopt;
-        }
-    }
+    parse(const Flag<T>& flag) const noexcept;
 
     template <class T>
     inline class std::enable_if<std::is_floating_point<T>::value, T>::type
-    parse(const Flag<T>& flag, T def) const noexcept
-    {
-        const auto ret_ = this->parse_str(flag.shrt, flag.lng);
-        if (ret_ == std::nullopt) {
-            if (flag.mandatory) mandatory_flag_hasnt_been_passed(flag.shrt, flag.lng);
-            return def;
-        }
-
-        const auto ret = *ret_;
-        try {
-            return std::stof(ret);
-        } catch (...) {
-            failed_to_parse_flag_to_int(flag.shrt, flag.lng, ret);
-        }
-    }
+    parse(const Flag<T>& flag, T def) const noexcept;
 
     template <class T>
     inline std::optional<std::enable_if_t<is_constructible_from_int<T>::value, T>>
-    parse(const Flag<T>& flag) const noexcept
-    {
-        const auto ret = this->parse_str(flag.shrt, flag.lng);
-        if (ret == std::nullopt) return std::nullopt;
-
-        try {
-            return std::stoi(*ret);
-        } catch (...) {
-            return std::nullopt;
-        }
-    }
+    parse(const Flag<T>& flag) const noexcept;
 
     template <class T>
     inline std::enable_if_t<is_constructible_from_int<T>::value, T>
-    parse(const Flag<T>& flag, T def) const noexcept
-    {
-        const auto ret_ = this->parse_str(flag.shrt, flag.lng);
-        if (ret_ == std::nullopt) {
-            if (flag.mandatory) mandatory_flag_hasnt_been_passed(flag.shrt, flag.lng);
-            return def;
-        }
+    parse(const Flag<T>& flag, T def) const noexcept;
+};
 
-        const auto ret = *ret_;
-        try {
-            return std::stoi(ret);
-        } catch (...) {
-            failed_to_parse_flag_to_int(flag.shrt, flag.lng, ret);
+#ifdef FLAG_IMPLEMENTATION
+
+#include <string>
+#include <cstdlib>
+#include <iomanip>
+#include <cstring>
+
+template <class T>
+std::ostream&
+operator<<(std::ostream& os, const Flag<T>& flag)
+{
+    const int HELP_WIDTH = 24;
+
+    os << std::right;
+    os << std::right
+       << "[" << flag.shrt << ", " << flag.lng << "]"
+       << std::setw(HELP_WIDTH - (std::strlen(flag.shrt) + std::strlen(flag.lng) + 4))
+       << " " << flag.help;
+
+    return os;
+}
+
+[[noreturn]] void
+Parser::mandatory_flag_hasnt_been_passed(const char *shrt, const char *lng)
+{
+    std::cerr << "Mandatory flag `" << shrt
+              << "` or `"           << lng
+              << "` hasn't been passed" << std::endl;
+
+    std::exit(1);
+}
+
+[[noreturn]] void
+Parser::flag_hasnt_been_passed(const char *shrt, const char *lng)
+{
+    std::cerr << "Flag `" << shrt
+              << "` or `" << lng
+              << "` hasn't been passed" << std::endl;
+
+    std::exit(1);
+}
+
+[[noreturn]] void
+Parser::failed_to_parse_flag_to_int(const char *shrt, const char *lng, const char *v)
+{
+    std::cerr << "Failed to parse `" << v << "` to integer"
+              << ", value of the `"  << shrt
+              << "` or `"            << lng << "` flag." << std::endl;
+
+    std::exit(1);
+}
+
+std::optional<const char *>
+Parser::parse_str(const char *shrt, const char *lng) const noexcept
+{
+    for (size_t i = 0; i < this->argc; i++) {
+        if (0 == std::strcmp(this->argv[i], shrt) or
+            0 == std::strcmp(this->argv[i], lng))
+        {
+            if (i + 1 >= this->argc) return std::nullopt;
+            return this->argv[i + 1];
         }
     }
-};
+
+    return std::nullopt;
+}
+
+inline const char *
+Parser::parse_str_or_exit(const char *shrt, const char *lng) const noexcept
+{
+    const auto ret = this->parse_str(shrt, lng);
+    if (ret == std::nullopt) flag_hasnt_been_passed(shrt, lng);
+    return *ret;
+}
+
+template <class T>
+inline std::optional<class std::enable_if<is_string_or_cstr<T>::value>::type>
+Parser::parse(const Flag<T>& flag) const noexcept
+{
+    return this->parse_str(flag.shrt, flag.lng);
+}
+
+template <class T>
+inline class std::enable_if<is_string_or_cstr<T>::value>::type
+Parser::parse(const Flag<T>& flag, T def) const noexcept
+{
+    const auto ret_ = this->parse_str(flag.shrt, flag.lng);
+    if (ret_ == std::nullopt) {
+        if (flag.mandatory) mandatory_flag_hasnt_been_passed(flag.shrt, flag.lng);
+        return def;
+    }
+    return *ret_;
+}
+
+template <class T>
+inline std::optional<class std::enable_if<std::is_floating_point<T>::value, T>::type>
+Parser::parse(const Flag<T>& flag) const noexcept
+{
+    const auto ret = this->parse_str(flag.shrt, flag.lng);
+    if (ret == std::nullopt) return std::nullopt;
+
+    try {
+        return std::stof(*ret);
+    } catch (...) {
+        return std::nullopt;
+    }
+}
+
+template <class T>
+inline class std::enable_if<std::is_floating_point<T>::value, T>::type
+Parser::parse(const Flag<T>& flag, T def) const noexcept
+{
+    const auto ret_ = this->parse_str(flag.shrt, flag.lng);
+    if (ret_ == std::nullopt) {
+        if (flag.mandatory) mandatory_flag_hasnt_been_passed(flag.shrt, flag.lng);
+        return def;
+    }
+
+    const auto ret = *ret_;
+    try {
+        return std::stof(ret);
+    } catch (...) {
+        failed_to_parse_flag_to_int(flag.shrt, flag.lng, ret);
+    }
+}
+
+template <class T>
+inline std::optional<std::enable_if_t<is_constructible_from_int<T>::value, T>>
+Parser::parse(const Flag<T>& flag) const noexcept
+{
+    const auto ret = this->parse_str(flag.shrt, flag.lng);
+    if (ret == std::nullopt) return std::nullopt;
+
+    try {
+        return std::stoi(*ret);
+    } catch (...) {
+        return std::nullopt;
+    }
+}
+
+template <class T>
+inline std::enable_if_t<is_constructible_from_int<T>::value, T>
+Parser::parse(const Flag<T>& flag, T def) const noexcept
+{
+    const auto ret_ = this->parse_str(flag.shrt, flag.lng);
+    if (ret_ == std::nullopt) {
+        if (flag.mandatory) mandatory_flag_hasnt_been_passed(flag.shrt, flag.lng);
+        return def;
+    }
+
+    const auto ret = *ret_;
+    try {
+        return std::stoi(ret);
+    } catch (...) {
+        failed_to_parse_flag_to_int(flag.shrt, flag.lng, ret);
+    }
+}
+
+#endif // FLAG_IMPLEMENTATION
