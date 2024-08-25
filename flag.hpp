@@ -96,6 +96,9 @@ struct Parser {
     [[noreturn]] static void
     failed_to_parse_flag_to_int(const char *shrt, const char *lng, const char *v);
 
+    [[noreturn]] static void
+    failed_to_parse_flag_to_float(const char *shrt, const char *lng, const char *v);
+
     std::optional<const char *>
     parse_str(const char *shrt, const char *lng) const noexcept;
 
@@ -178,6 +181,16 @@ Parser::flag_hasnt_been_passed(const char *shrt, const char *lng)
 Parser::failed_to_parse_flag_to_int(const char *shrt, const char *lng, const char *v)
 {
     std::cerr << "Failed to parse `" << v << "` to integer"
+              << ", value of the `"  << shrt
+              << "` or `"            << lng << "` flag." << std::endl;
+
+    std::exit(1);
+}
+
+[[noreturn]] void
+Parser::failed_to_parse_flag_to_float(const char *shrt, const char *lng, const char *v)
+{
+    std::cerr << "Failed to parse `" << v << "` to float"
               << ", value of the `"  << shrt
               << "` or `"            << lng << "` flag." << std::endl;
 
@@ -275,7 +288,7 @@ Parser::parse(const Flag<T>& flag, T def) const noexcept
     try {
         return std::stof(ret);
     } catch (...) {
-        failed_to_parse_flag_to_int(flag.shrt, flag.lng, ret);
+        failed_to_parse_flag_to_float(flag.shrt, flag.lng, ret);
     }
 }
 
