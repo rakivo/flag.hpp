@@ -247,7 +247,12 @@ Parser::passed(const Flag<T> &flag) const noexcept
 inline std::optional<const char *>
 Parser::parse(const Flag<const char *> &flag) const noexcept
 {
-    return parse_str(flag.shrt, flag.lng);
+    const auto ret = parse_str(flag.shrt, flag.lng);
+    if (ret == std::nullopt) {
+        if (flag.mandatory) mandatory_flag_hasnt_been_passed(flag.shrt, flag.lng);
+        return std::nullopt;
+    }
+    return *ret;
 }
 
 inline const char *
@@ -265,7 +270,10 @@ inline std::optional<std::string>
 Parser::parse(const Flag<std::string> &flag) const noexcept
 {
     const auto ret = parse_str(flag.shrt, flag.lng);
-    if (ret == std::nullopt) return std::nullopt;
+    if (ret == std::nullopt) {
+        if (flag.mandatory) mandatory_flag_hasnt_been_passed(flag.shrt, flag.lng);
+        return std::nullopt;
+    }
     return std::string(*ret);
 }
 
@@ -285,7 +293,10 @@ inline std::enable_if_t<std::is_floating_point<T>::value, std::optional<T>>
 Parser::parse(const Flag<T> &flag) const noexcept
 {
     const auto ret = parse_str(flag.shrt, flag.lng);
-    if (ret == std::nullopt) return std::nullopt;
+    if (ret == std::nullopt) {
+        if (flag.mandatory) mandatory_flag_hasnt_been_passed(flag.shrt, flag.lng);
+        return std::nullopt;
+    }
 
     try {
         return static_cast<T>(std::stof(*ret));
@@ -317,7 +328,10 @@ inline std::optional<std::enable_if_t<is_constructible_from_int<T>::value, T>>
 Parser::parse(const Flag<T> &flag) const noexcept
 {
     const auto ret = parse_str(flag.shrt, flag.lng);
-    if (ret == std::nullopt) return std::nullopt;
+    if (ret == std::nullopt) {
+        if (flag.mandatory) mandatory_flag_hasnt_been_passed(flag.shrt, flag.lng);
+        return std::nullopt;
+    }
 
     try {
         return static_cast<T>(std::stoi(*ret));
