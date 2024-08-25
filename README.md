@@ -1,5 +1,7 @@
 # `flag.hpp`
-> `flag.hpp` is a header only, stb-style library, to include the implementation of all the functions, you need to define `FLAG_IMPLEMENTATION` before including the `flag.hpp` itself.
+> `flag.hpp` is a super lightweight, single file, header only, stb-style library, to include the implementation of all the functions, you need to define `FLAG_IMPLEMENTATION` before including the `flag.hpp` itself.
+
+> Also, the library is designed to use with `C++17` and above ISO standard.
 
 > You can see the example of using this library here, from [`example.cpp`](https://github.com/rakivo/flag.hpp/master/example.cpp):
 ```cpp
@@ -58,5 +60,7 @@ int main(int argc, const char *argv[])
     return 0;
 }
 ```
+
+> By the way, you can run this example by doing: `$ ./run.sh`
 
 ## Report any bugs at the [github `issues` section](https://github.com/rakivo/flag.hpp/issues)
