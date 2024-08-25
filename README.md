@@ -58,7 +58,7 @@ int main(int argc, const char *argv[])
 
 > By the way, you can run this example by doing:
 ```
-$ ./build.sh
+$ g++ -o example -std=c++17 example.cpp
 $ ./example <your_flags...>
 ```
 
