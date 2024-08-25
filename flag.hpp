@@ -123,11 +123,11 @@ struct Parser {
     parse(const Flag<std::string> &flag, std::string def) const noexcept;
 
     template <class T>
-    inline std::optional<class std::enable_if<std::is_floating_point<T>::value, T>::type>
+    inline std::enable_if_t<std::is_floating_point<T>::value, std::optional<T>>
     parse(const Flag<T> &flag) const noexcept;
 
     template <class T>
-    inline class std::enable_if<std::is_floating_point<T>::value, T>::type
+    inline std::enable_if_t<std::is_floating_point<T>::value, T>
     parse(const Flag<T> &flag, T def) const noexcept;
 
     template <class T>
@@ -281,21 +281,21 @@ Parser::parse(const Flag<std::string> &flag, std::string def) const noexcept
 }
 
 template <class T>
-inline std::optional<class std::enable_if<std::is_floating_point<T>::value, T>::type>
+inline std::enable_if_t<std::is_floating_point<T>::value, std::optional<T>>
 Parser::parse(const Flag<T> &flag) const noexcept
 {
     const auto ret = parse_str(flag.shrt, flag.lng);
     if (ret == std::nullopt) return std::nullopt;
 
     try {
-        return std::stof(*ret);
+        return static_cast<T>(std::stof(*ret));
     } catch (...) {
         return std::nullopt;
     }
 }
 
 template <class T>
-inline class std::enable_if<std::is_floating_point<T>::value, T>::type
+inline std::enable_if_t<std::is_floating_point<T>::value, T>
 Parser::parse(const Flag<T> &flag, T def) const noexcept
 {
     const auto ret_ = parse_str(flag.shrt, flag.lng);
@@ -306,7 +306,7 @@ Parser::parse(const Flag<T> &flag, T def) const noexcept
 
     const auto ret = *ret_;
     try {
-        return std::stof(ret);
+        return static_cast<T>(std::stof(ret));
     } catch (...) {
         failed_to_parse_flag_to_float(flag.shrt, flag.lng, ret);
     }
@@ -320,7 +320,7 @@ Parser::parse(const Flag<T> &flag) const noexcept
     if (ret == std::nullopt) return std::nullopt;
 
     try {
-        return std::stoi(*ret);
+        return static_cast<T>(std::stoi(*ret));
     } catch (...) {
         return std::nullopt;
     }
@@ -338,7 +338,7 @@ Parser::parse(const Flag<T> &flag, T def) const noexcept
 
     const auto ret = *ret_;
     try {
-        return std::stoi(ret);
+        return static_cast<T>(std::stoi(ret));
     } catch (...) {
         failed_to_parse_flag_to_int(flag.shrt, flag.lng, ret);
     }
