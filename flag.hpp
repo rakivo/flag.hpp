@@ -66,7 +66,7 @@ struct Flag {
 
 template <class T>
 std::ostream&
-operator<<(std::ostream& os, const Flag<T>& flag);
+operator<<(std::ostream &os, const Flag<T> &flag);
 
 // Template for integer types: `int`, `int32_t`, `uint32_t`, etc...
 template <class T, class = void>
@@ -106,33 +106,37 @@ struct Parser {
     parse_str_or_exit(const char *shrt, const char *lng) const noexcept;
 
 
+    template <class T>
+    bool
+    passed(const Flag<T> &flag) const noexcept;
+
     inline std::optional<const char *>
-    parse(const Flag<const char *>& flag) const noexcept;
+    parse(const Flag<const char *> &flag) const noexcept;
 
     inline const char *
-    parse(const Flag<const char *>& flag, const char * def) const noexcept;
+    parse(const Flag<const char *> &flag, const char * def) const noexcept;
 
     inline std::optional<std::string>
-    parse(const Flag<std::string>& flag) const noexcept;
+    parse(const Flag<std::string> &flag) const noexcept;
 
     inline std::string
-    parse(const Flag<std::string>& flag, std::string def) const noexcept;
+    parse(const Flag<std::string> &flag, std::string def) const noexcept;
 
     template <class T>
     inline std::optional<class std::enable_if<std::is_floating_point<T>::value, T>::type>
-    parse(const Flag<T>& flag) const noexcept;
+    parse(const Flag<T> &flag) const noexcept;
 
     template <class T>
     inline class std::enable_if<std::is_floating_point<T>::value, T>::type
-    parse(const Flag<T>& flag, T def) const noexcept;
+    parse(const Flag<T> &flag, T def) const noexcept;
 
     template <class T>
     inline std::optional<std::enable_if_t<is_constructible_from_int<T>::value, T>>
-    parse(const Flag<T>& flag) const noexcept;
+    parse(const Flag<T> &flag) const noexcept;
 
     template <class T>
     inline std::enable_if_t<is_constructible_from_int<T>::value, T>
-    parse(const Flag<T>& flag, T def) const noexcept;
+    parse(const Flag<T> &flag, T def) const noexcept;
 };
 
 #ifdef FLAG_IMPLEMENTATION
@@ -144,11 +148,10 @@ struct Parser {
 
 template <class T>
 std::ostream&
-operator<<(std::ostream& os, const Flag<T>& flag)
+operator<<(std::ostream &os, const Flag<T> &flag)
 {
     const int HELP_WIDTH = 24;
 
-    os << std::right;
     os << std::right
        << "[" << flag.shrt << ", " << flag.lng << "]"
        << std::setw(HELP_WIDTH - (std::strlen(flag.shrt) + std::strlen(flag.lng) + 4))
@@ -224,14 +227,31 @@ Parser::parse_str_or_exit(const char *shrt, const char *lng) const noexcept
     return *ret;
 }
 
+template <class T>
+bool
+Parser::passed(const Flag<T> &flag) const noexcept
+{
+    for (size_t i = 0; i < argc; i++) {
+        if ((0 == std::strcmp(argv[i], flag.shrt) or
+             0 == std::strcmp(argv[i], flag.lng)) or
+            (0 == std::strncmp(argv[i], flag.shrt, std::strlen(flag.shrt)) or
+             0 == std::strncmp(argv[i], flag.lng,  std::strlen(flag.lng))))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 inline std::optional<const char *>
-Parser::parse(const Flag<const char *>& flag) const noexcept
+Parser::parse(const Flag<const char *> &flag) const noexcept
 {
     return parse_str(flag.shrt, flag.lng);
 }
 
 inline const char *
-Parser::parse(const Flag<const char *>& flag, const char *def) const noexcept
+Parser::parse(const Flag<const char *> &flag, const char *def) const noexcept
 {
     const auto ret_ = parse_str(flag.shrt, flag.lng);
     if (ret_ == std::nullopt) {
@@ -242,7 +262,7 @@ Parser::parse(const Flag<const char *>& flag, const char *def) const noexcept
 }
 
 inline std::optional<std::string>
-Parser::parse(const Flag<std::string>& flag) const noexcept
+Parser::parse(const Flag<std::string> &flag) const noexcept
 {
     const auto ret = parse_str(flag.shrt, flag.lng);
     if (ret == std::nullopt) return std::nullopt;
@@ -250,7 +270,7 @@ Parser::parse(const Flag<std::string>& flag) const noexcept
 }
 
 inline std::string
-Parser::parse(const Flag<std::string>& flag, std::string def) const noexcept
+Parser::parse(const Flag<std::string> &flag, std::string def) const noexcept
 {
     const auto ret_ = parse_str(flag.shrt, flag.lng);
     if (ret_ == std::nullopt) {
@@ -262,7 +282,7 @@ Parser::parse(const Flag<std::string>& flag, std::string def) const noexcept
 
 template <class T>
 inline std::optional<class std::enable_if<std::is_floating_point<T>::value, T>::type>
-Parser::parse(const Flag<T>& flag) const noexcept
+Parser::parse(const Flag<T> &flag) const noexcept
 {
     const auto ret = parse_str(flag.shrt, flag.lng);
     if (ret == std::nullopt) return std::nullopt;
@@ -276,7 +296,7 @@ Parser::parse(const Flag<T>& flag) const noexcept
 
 template <class T>
 inline class std::enable_if<std::is_floating_point<T>::value, T>::type
-Parser::parse(const Flag<T>& flag, T def) const noexcept
+Parser::parse(const Flag<T> &flag, T def) const noexcept
 {
     const auto ret_ = parse_str(flag.shrt, flag.lng);
     if (ret_ == std::nullopt) {
@@ -294,7 +314,7 @@ Parser::parse(const Flag<T>& flag, T def) const noexcept
 
 template <class T>
 inline std::optional<std::enable_if_t<is_constructible_from_int<T>::value, T>>
-Parser::parse(const Flag<T>& flag) const noexcept
+Parser::parse(const Flag<T> &flag) const noexcept
 {
     const auto ret = parse_str(flag.shrt, flag.lng);
     if (ret == std::nullopt) return std::nullopt;
@@ -308,7 +328,7 @@ Parser::parse(const Flag<T>& flag) const noexcept
 
 template <class T>
 inline std::enable_if_t<is_constructible_from_int<T>::value, T>
-Parser::parse(const Flag<T>& flag, T def) const noexcept
+Parser::parse(const Flag<T> &flag, T def) const noexcept
 {
     const auto ret_ = parse_str(flag.shrt, flag.lng);
     if (ret_ == std::nullopt) {
