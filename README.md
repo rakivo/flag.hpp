@@ -61,6 +61,10 @@ int main(int argc, const char *argv[])
 }
 ```
 
-> By the way, you can run this example by doing: `$ ./run.sh`
+> By the way, you can run this example by doing:
+```
+$ ./build.sh
+$ ./example <your_flags...>
+```
 
 ## Report any bugs at the [github `issues` section](https://github.com/rakivo/flag.hpp/issues)
