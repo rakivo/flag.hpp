@@ -52,11 +52,6 @@ int main(int argc, const char *argv[])
     const auto mvalue = parser.parse(mandatory_flag);
     std::cout << "Value: " << *mvalue << std::endl;
 
-    // print_contents(parser, float_flag);
-    // print_contents(parser, integer_flag);
-    // print_contents(parser, mandatory_flag);
-    // print_contents(parser, always_make_flag);
-
     return 0;
 }
 ```
