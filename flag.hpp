@@ -146,6 +146,7 @@ struct Parser {
 #include <cstdlib>
 #include <iomanip>
 #include <cstring>
+#include <iostream>
 
 template <class T>
 std::ostream&
