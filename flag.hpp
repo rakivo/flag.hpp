@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <string>
+#include <ostream>
 #include <optional>
 #include <type_traits>
 
@@ -141,7 +143,6 @@ struct Parser {
 
 #ifdef FLAG_IMPLEMENTATION
 
-#include <string>
 #include <cstdlib>
 #include <iomanip>
 #include <cstring>
